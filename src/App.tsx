@@ -38,7 +38,7 @@ const App = () => {
   });
 
   createEffect(() => {
-    if (currentTimer() === 0) {
+    if (currentTimer() === 0 && workDur() != 0) {
       setOnBreak((prev) => !prev);
     }
   });

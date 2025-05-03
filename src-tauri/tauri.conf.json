@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "pomodoro",
+  "productName": "Pomodoro Thingy",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.muma.pomodoro",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -13,7 +13,7 @@
 
     "windows": [
       {
-        "title": "pomodoro",
+        "title": "Pomodoro Timer",
         "width": 600,
         "height": 800,
         "resizable": false,
