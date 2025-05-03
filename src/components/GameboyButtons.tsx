@@ -29,7 +29,6 @@ const GameboyButtons = () => {
 
   const saveWorkDur = () => {
     setWorkDur(editingDur());
-    setCurrentTimer(editingDur());
     saveWorkData(editingDur());
   };
   const saveBreakDur = () => {
