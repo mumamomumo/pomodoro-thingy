@@ -8,6 +8,7 @@ import {
   workDurSignal,
 } from "../state/time";
 import { saveBreakData, saveWorkData } from "../data/timeData";
+import { getHms } from "../utils/formatTime";
 
 const GameboyButtons = () => {
   const [dPadDown, setDPadDown] = createSignal<
@@ -188,11 +189,34 @@ const GameboyButtons = () => {
     else if (event.key === "ArrowUp") onUpDown();
     else if (event.key === "ArrowDown") onDownDown();
     else {
-      if (event.keyCode < 59) {
+      // Setting time using keyboard inputs
+      if (event.keyCode < 59 && event.keyCode >= 48) {
         setCurrentlyEditing("second");
         const number = event.keyCode - 48;
-        setEditingDur((prev) => prev * 10);
-        setEditingDur((prev) => prev + 1 * number);
+        const hms = getHms(editingDur());
+
+        let news = hms[2] * 10 + number;
+        let overflows = Math.floor(news / 100);
+        let newm = hms[1] * 10 + overflows;
+        let overflowm = Math.floor(newm / 100);
+        let newh = overflowm;
+
+        let s = news % 100;
+        let m = newm % 100;
+        let h = newh % 10;
+
+        setEditingDur(h * 3600 + m * 60 + s);
+      }
+      // Deleting the time
+      else if (event.key === "Backspace") {
+        const hms = getHms(editingDur());
+        let hBack = hms[0];
+        let newH = 0;
+        let mBack = hms[1] % 10;
+        let newM = Math.floor(hms[1] / 10) + hBack * 10;
+        let newS = Math.floor(hms[2] / 10) + mBack * 10;
+
+        setEditingDur(newH * 3600 + newM * 60 + newS);
       }
     }
   };

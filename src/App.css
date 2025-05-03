@@ -246,11 +246,22 @@ button.gameboy-thumb-button {
   aspect-ratio: 1/1;
   width: 7vw;
   border-radius: 50%;
-  background: radial-gradient(rgb(175, 50, 50), red);
+  background: radial-gradient(circle at 60% 65%, rgb(175, 50, 50), red);
   border: none;
   outline: none;
   font-size: large;
   transform: rotate(-25deg) translate(-5vw, -5vh);
+  transition: box-shadow 100ms;
+  box-shadow: 1px 2px 4px 1px black;
+}
+
+button.gameboy-thumb-button:active {
+  background: radial-gradient(
+    circle at 60% 70%,
+    rgb(165, 0, 0),
+    rgb(250, 50, 50)
+  );
+  box-shadow: 0px 1px 2px 1px black;
 }
 
 button.gameboy-thumb-button > * {

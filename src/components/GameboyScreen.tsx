@@ -12,7 +12,7 @@ import { formatTime } from "../utils/formatTime";
 import { createEffect, Match, Switch } from "solid-js";
 
 const GameboyScreen = () => {
-  const [currentTime, setTime] = timeSignal;
+  const [currentTime] = timeSignal;
   const [keyboardOn, setKeyobardOn] = keyboardSignal;
   const [onBreak] = breakTimeSignal;
   const [workDur] = workDurSignal;
@@ -27,11 +27,6 @@ const GameboyScreen = () => {
     if (editingTime() != "none") setKeyobardOn(true);
     else setKeyobardOn(false);
   });
-
-  // Update time
-  setInterval(() => {
-    setTime(new Date());
-  }, 1000);
 
   return (
     <div class="gameboy-screen">

@@ -2,9 +2,17 @@ import "./App.css";
 import GameboyButtons from "./components/GameboyButtons";
 import GameboyScreen from "./components/GameboyScreen";
 import { loadData } from "./data/dataManager";
+import { timeSignal } from "./state/time";
 
 const App = () => {
   loadData();
+  const setTime = timeSignal[1];
+
+  // Update time
+  setInterval(() => {
+    setTime(new Date());
+  }, 1000);
+
   return (
     <div class="gameboy">
       <svg

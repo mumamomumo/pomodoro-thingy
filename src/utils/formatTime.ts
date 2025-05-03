@@ -11,3 +11,12 @@ export function formatTime(time: number, place: number = 3) {
       .toString()
       .padStart(2, "0")}s`;
 }
+
+export function getHms(time: number) {
+  var hms = formatTime(time)
+    .split(" ")
+    .map((item) => {
+      return parseInt(item.replace(/[hms ]+/, ""));
+    });
+  return hms;
+}
