@@ -3,8 +3,11 @@ import { cn } from "../utils/cn";
 import {
   breakDurSignal,
   currentlyEditingSignal,
+  currentTimerSignal,
   editingDurSignal,
   editingTimeSignal,
+  onBreakSignal,
+  timerStartSignal,
   workDurSignal,
 } from "../state/time";
 import { saveBreakData, saveWorkData } from "../data/timeData";
@@ -20,9 +23,13 @@ const GameboyButtons = () => {
   const [editingDur, setEditingDur] = editingDurSignal;
   const [workDur, setWorkDur] = workDurSignal;
   const [breakDur, setBreakDur] = breakDurSignal;
+  const [_, setCurrentTimer] = currentTimerSignal;
+  const [timerStart, setTimerStart] = timerStartSignal;
+  const [onBreak, setOnBreak] = onBreakSignal;
 
   const saveWorkDur = () => {
     setWorkDur(editingDur());
+    setCurrentTimer(editingDur());
     saveWorkData(editingDur());
   };
   const saveBreakDur = () => {
@@ -30,10 +37,15 @@ const GameboyButtons = () => {
     saveBreakData(editingDur());
   };
 
-  const onSelectClicked = () => {};
-  const onStartClicked = () => {};
+  const onSelectClicked = () => {
+    setOnBreak((prev) => !prev);
+  };
+  const onStartClicked = () => {
+    setTimerStart((prev) => !prev);
+  };
 
   const onAClick = () => {
+    if (timerStart()) return;
     switch (editingTime()) {
       case "work":
         saveWorkDur();
@@ -54,6 +66,7 @@ const GameboyButtons = () => {
     }
   };
   const onBClick = () => {
+    if (timerStart()) return;
     switch (editingTime()) {
       case "work":
         saveWorkDur();
@@ -95,7 +108,12 @@ const GameboyButtons = () => {
   //#endregion
   //#region Center DPAD
   const onCenterDown = () => {
-    if (editingTime() != "none") setEditingDur(0);
+    if (editingTime() != "none") {
+      setEditingDur(0);
+    } else {
+      if (onBreak()) setCurrentTimer(breakDur());
+      else setCurrentTimer(workDur());
+    }
     setDPadDown("center");
   };
   const onCenterUp = () => {
@@ -183,42 +201,40 @@ const GameboyButtons = () => {
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === "a") onAClick();
     else if (event.key === "b") onBClick();
-    else if (event.key === " ") onSelectClicked();
+    else if (event.key === " ") onStartClicked();
     else if (event.key === "ArrowRight") onRightDown();
     else if (event.key === "ArrowLeft") onLeftDown();
     else if (event.key === "ArrowUp") onUpDown();
     else if (event.key === "ArrowDown") onDownDown();
-    else {
-      // Setting time using keyboard inputs
-      if (event.keyCode < 59 && event.keyCode >= 48) {
-        setCurrentlyEditing("second");
-        const number = event.keyCode - 48;
-        const hms = getHms(editingDur());
+    // Number keys
+    else if (event.keyCode < 59 && event.keyCode >= 48) {
+      setCurrentlyEditing("second");
+      const number = event.keyCode - 48;
+      const hms = getHms(editingDur());
 
-        let news = hms[2] * 10 + number;
-        let overflows = Math.floor(news / 100);
-        let newm = hms[1] * 10 + overflows;
-        let overflowm = Math.floor(newm / 100);
-        let newh = overflowm;
+      let news = hms[2] * 10 + number;
+      let overflows = Math.floor(news / 100);
+      let newm = hms[1] * 10 + overflows;
+      let overflowm = Math.floor(newm / 100);
+      let newh = overflowm;
 
-        let s = news % 100;
-        let m = newm % 100;
-        let h = newh % 10;
+      let s = news % 100;
+      let m = newm % 100;
+      let h = newh % 10;
 
-        setEditingDur(h * 3600 + m * 60 + s);
-      }
-      // Deleting the time
-      else if (event.key === "Backspace") {
-        const hms = getHms(editingDur());
-        let hBack = hms[0];
-        let newH = 0;
-        let mBack = hms[1] % 10;
-        let newM = Math.floor(hms[1] / 10) + hBack * 10;
-        let newS = Math.floor(hms[2] / 10) + mBack * 10;
-
-        setEditingDur(newH * 3600 + newM * 60 + newS);
-      }
+      setEditingDur(h * 3600 + m * 60 + s);
     }
+    // Deleting the time
+    else if (event.key === "Backspace") {
+      const hms = getHms(editingDur());
+      let hBack = hms[0];
+      let newH = 0;
+      let mBack = hms[1] % 10;
+      let newM = Math.floor(hms[1] / 10) + hBack * 10;
+      let newS = Math.floor(hms[2] / 10) + mBack * 10;
+
+      setEditingDur(newH * 3600 + newM * 60 + newS);
+    } else console.log(event);
   };
   window.addEventListener("keydown", onKeyDown);
   onCleanup(() => {
@@ -243,6 +259,10 @@ const GameboyButtons = () => {
             class="center d-pad-button"
             onMouseDown={onCenterDown}
             onMouseUp={onCenterUp}
+            onDblClick={() => {
+              setOnBreak(false);
+              setCurrentTimer(workDur);
+            }}
           ></div>
           <div
             class="down d-pad-button"

@@ -1,8 +1,11 @@
 import {
   breakDurSignal,
   currentlyEditingSignal,
+  currentTimerSignal,
   editingDurSignal,
   editingTimeSignal,
+  onBreakSignal,
+  timerStartSignal,
   timeSignal,
   workDurSignal,
 } from "../state/time";
@@ -12,21 +15,28 @@ import { formatTime } from "../utils/formatTime";
 import { createEffect, Match, Switch } from "solid-js";
 
 const GameboyScreen = () => {
-  const [currentTime] = timeSignal;
+  const [currentDate] = timeSignal;
   const [keyboardOn, setKeyobardOn] = keyboardSignal;
-  const [onBreak] = breakTimeSignal;
+  const [onBreakBulb, setBreakBulb] = breakTimeSignal;
+  const [timerBulb, setTimerBulb] = timerOnSignal;
   const [workDur] = workDurSignal;
   const [breakDur] = breakDurSignal;
-  const [timerOn] = timerOnSignal;
 
   const [currentlyEditing] = currentlyEditingSignal;
   const [editingTime] = editingTimeSignal;
   const [editingDur] = editingDurSignal;
 
+  const [onBreak] = onBreakSignal;
+  const [timerOn] = timerStartSignal;
+  const currentTimer = currentTimerSignal[0];
+
   createEffect(() => {
     if (editingTime() != "none") setKeyobardOn(true);
     else setKeyobardOn(false);
   });
+
+  createEffect(() => setBreakBulb(onBreak()));
+  createEffect(() => setTimerBulb(timerOn()));
 
   return (
     <div class="gameboy-screen">
@@ -45,7 +55,7 @@ const GameboyScreen = () => {
         <button
           class={cn(
             "gameboy-break gameboy-bulb",
-            onBreak() ? "active" : "inactive"
+            onBreakBulb() ? "active" : "inactive"
           )}
         >
           <p>On break</p>
@@ -53,7 +63,7 @@ const GameboyScreen = () => {
         <button
           class={cn(
             "gameboy-timer gameboy-bulb",
-            timerOn() ? "active" : "inactive"
+            timerBulb() ? "active" : "inactive"
           )}
         >
           <p>Timer on</p>
@@ -68,7 +78,7 @@ const GameboyScreen = () => {
               : ""}
           </div>
           <div class="side-2 side">
-            <p>{currentTime().toLocaleTimeString()}</p>
+            <p>{currentDate().toLocaleTimeString()}</p>
           </div>
         </div>
         {/* Main screen. Time */}
@@ -111,8 +121,15 @@ const GameboyScreen = () => {
             {/* When not editing */}
             <Match when={editingTime() == "none"}>
               <p class="time">
-                <span class="work">{formatTime(workDur())}</span> <br />
-                <span class="break">{formatTime(breakDur(), 2)}</span>
+                <span class="work">
+                  {formatTime(currentTimer(), onBreak() ? 2 : 3)}
+                </span>{" "}
+                <br />
+                <span class="break">
+                  {!onBreak()
+                    ? formatTime(breakDur(), 2)
+                    : formatTime(workDur())}
+                </span>
               </p>
             </Match>
           </Switch>
@@ -121,9 +138,15 @@ const GameboyScreen = () => {
         <div class="gameboy-screen-bottombar">
           <Switch>
             {/* Not editing anything currently */}
-            <Match when={editingTime() === "none"}>
+            <Match when={editingTime() === "none" && !timerOn()}>
               <p>
                 <span class="button">A</span> Edit time
+              </p>
+              <p>
+                <span class="button">
+                  <img src="/images/circle.svg" width={10} />
+                </span>{" "}
+                Reset time
               </p>
             </Match>
             {/* Editing working time */}

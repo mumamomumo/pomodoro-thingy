@@ -1,12 +1,52 @@
+import { createEffect } from "solid-js";
 import "./App.css";
 import GameboyButtons from "./components/GameboyButtons";
 import GameboyScreen from "./components/GameboyScreen";
 import { loadData } from "./data/dataManager";
-import { timeSignal } from "./state/time";
+import {
+  breakDurSignal,
+  currentTimerSignal,
+  onBreakSignal,
+  timerStartSignal,
+  timeSignal,
+  workDurSignal,
+} from "./state/time";
 
 const App = () => {
   loadData();
   const setTime = timeSignal[1];
+
+  const [currentTimer, setCurrentTimer] = currentTimerSignal;
+  const [workDur] = workDurSignal;
+  const [breakDur] = breakDurSignal;
+  const [onBreak, setOnBreak] = onBreakSignal;
+  const [timerStart] = timerStartSignal;
+
+  let pomodoroInterval: any;
+
+  setCurrentTimer(workDur);
+  setOnBreak(false);
+
+  createEffect(() => {
+    if (timerStart()) {
+      pomodoroInterval = setInterval(() => {
+        setCurrentTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      clearInterval(pomodoroInterval);
+    }
+  });
+
+  createEffect(() => {
+    if (currentTimer() === 0) {
+      setOnBreak((prev) => !prev);
+    }
+  });
+
+  createEffect(() => {
+    if (onBreak()) setCurrentTimer(breakDur());
+    else setCurrentTimer(workDur());
+  });
 
   // Update time
   setInterval(() => {

@@ -12,3 +12,6 @@ export const currentlyEditingSignal = createSignal<
 >("none");
 
 // Pomodoro part
+export const currentTimerSignal = createSignal(0);
+export const timerStartSignal = createSignal(false);
+export const onBreakSignal = createSignal(false);
