@@ -40,6 +40,7 @@ const GameboyButtons = () => {
     setOnBreak((prev) => !prev);
   };
   const onStartClicked = () => {
+    if (currentlyEditing() != "none") return;
     setTimerStart((prev) => !prev);
   };
 
